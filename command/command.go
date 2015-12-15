@@ -169,6 +169,10 @@ func (p *Player) Undo() error {
 	return p.playerCommands.UndoLastCommand()
 }
 
+func (p *Player) Redo() error {
+	return errors.New("redo not implemented yet")
+}
+
 // Gets the current shift state (actually returns p.transmission.State) (this should be abstracted)
 func (p *Player) GetShiftState() string {
 	return p.State
