@@ -32,5 +32,15 @@ func TestTransmission(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(p.State, ShouldEqual, Idle)
 		})
+		Convey("We can redo something that has been undone", func() {
+			p.ShiftUp()
+			So(p.State, ShouldEqual, ShiftingUp)
+			err := p.Undo()
+			So(err, ShouldBeNil)
+			So(p.State, ShouldEqual, Idle)
+			err := p.Redo()
+			So(err, ShouldBeNil)
+			So(p.State, ShouldBeEqual, ShiftingUp)
+		})
 	})
 }
