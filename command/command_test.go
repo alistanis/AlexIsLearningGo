@@ -39,8 +39,8 @@ func TestTransmission(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(p.State, ShouldEqual, Idle)
 			err = p.Redo()
-			So(err, ShouldBeNil)
-			So(p.State, ShouldEqual, ShiftingUp)
+			So(err, ShouldNotBeNil)
+			So(p.State, ShouldEqual, Idle)
 		})
 	})
 }
