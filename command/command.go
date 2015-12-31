@@ -138,30 +138,26 @@ func (t *transmission) Undo() error {
 // The Player struct contains pointers to a transmission, shiftUpCommand, shiftDownCommand (those should be moved to a
 // shiftController or shifter struct) and contains a list of the previous commands run by the player.
 type Player struct {
-	*transmission
-	*shiftUpCommand
-	*shiftDownCommand
 	playerCommands *CommandsList
+	Shifter        *shiftController
 }
 
 // Returns a new player object with a default transmission and commandsList. p.transmission, p.shiftUpCommand, and p.shiftDownCommand all
 // contain a pointer to the same transmission (which is why this should be abstracted)
 func NewPlayer() *Player {
-	t := newTransmission()
 	commandsList := NewCommandsList()
-	return &Player{transmission: t, playerCommands: commandsList, shiftUpCommand: newShiftUpCommand(t), shiftDownCommand: newShiftDownCommand(t)}
+	shiftController := newShiftController()
+	return &Player{playerCommands: commandsList, Shifter: shiftController}
 }
 
-// Makes a call to the shift down command
+// Makes a call to the shift down command via the shiftController
 func (p *Player) ShiftDown() {
-	p.shiftDownCommand.Execute()
-	p.playerCommands.PushCommand(p.shiftDownCommand)
+	p.Shifter.ShiftDownAction(p.playerCommands)
 }
 
-// Makes a call to the shift up command
+// Makes a call to the shift up command via the shiftController
 func (p *Player) ShiftUp() {
-	p.shiftUpCommand.Execute()
-	p.playerCommands.PushCommand(p.shiftUpCommand)
+	p.Shifter.ShiftUpAction(p.playerCommands)
 }
 
 // Undoes whatever the last command was and returns an error if there was one
@@ -169,9 +165,8 @@ func (p *Player) Undo() error {
 	return p.playerCommands.UndoLastCommand()
 }
 
-// Gets the current shift state (actually returns p.transmission.State) (this should be abstracted)
-func (p *Player) GetShiftState() string {
-	return p.State
+func (p *Player) Redo() error {
+	return errors.New("redo not implemented yet")
 }
 
 // Represents a shift up command. Has a pointer to a transmission
@@ -202,4 +197,49 @@ func (s *shiftUpCommand) Execute() {
 // Implements the Execute() part of the Command interface
 func (s *shiftDownCommand) Execute() {
 	s.ShiftDown()
+}
+
+// Manages interactions between Player and Transmission
+type shiftController struct {
+	*transmission
+	*shiftDownCommand
+	*shiftUpCommand
+}
+
+// Returns a new shiftController with pointers to a transmission, shiftUpCommand and shiftDownCommand.
+// Things to consider: once we have multiple players each shifting their own transmission, should those interactions all be handled by a single shiftController, or should each player/transmission pair get it's own shiftController?
+func newShiftController() *shiftController {
+	t := newTransmission()
+	d := newShiftDownCommand(t)
+	u := newShiftUpCommand(t)
+	return &shiftController{t, d, u}
+}
+
+// Handles shifting a transmission up for a player
+func (s *shiftController) ShiftUpAction(c *CommandsList) {
+	s.shiftUpCommand.Execute()
+
+	// don't know if this is the best approach, but I don't think the alternative - returning the shiftCommand as a "success" value and having the Player's shiftUp method push that onto the slice - is really any better
+	c.PushCommand(s.shiftUpCommand)
+}
+
+// Handles shifting a transmission down for a player
+func (s *shiftController) ShiftDownAction(c *CommandsList) {
+	s.shiftDownCommand.Execute()
+	c.PushCommand(s.shiftDownCommand)
+}
+
+// Handles undoing the last shift action for a player
+func (s *shiftController) UndoLastAction() {
+
+}
+
+// Handles redoing the last action undone for a player
+func (s *shiftController) RedoLastUndoAction() error {
+	return errors.New("redo not implemented yet")
+}
+
+// Returns this shiftController's transmission's State
+func (s *shiftController) GetTransmissionState() string {
+	return s.transmission.State
 }
