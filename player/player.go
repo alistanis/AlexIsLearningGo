@@ -1,7 +1,9 @@
 package player
 
 import (
-	"AlexIsLearningGo/car/controllers/shifter"
+	. "AlexIsLearningGo/car/controllers/shifter"
+	. "AlexIsLearningGo/command"
+	"errors"
 )
 
 // Things to consider:
@@ -18,14 +20,14 @@ import (
 // shiftController or shifter struct) and contains a list of the previous commands run by the player.
 type Player struct {
 	playerCommands *CommandsList
-	Shifter        *shiftController
+	Shifter        *ShiftController
 }
 
 // Returns a new player object with a default transmission and commandsList. p.transmission, p.shiftUpCommand, and p.shiftDownCommand all
 // contain a pointer to the same transmission (which is why this should be abstracted)
 func NewPlayer() *Player {
 	commandsList := NewCommandsList()
-	shiftController := newShiftController()
+	shiftController := NewShiftController()
 	return &Player{playerCommands: commandsList, Shifter: shiftController}
 }
 

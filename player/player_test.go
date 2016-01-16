@@ -1,9 +1,9 @@
 package player
 
 import (
-	"testing"
-
+	. "AlexIsLearningGo/car/transmission"
 	. "github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 // At SessionM we use goconvey:
